@@ -7,23 +7,23 @@ from typing import Any, Callable, Optional
 class MenuItem(BaseModel):
     """
     Represents a single, selectable item within a TyperdanticMenu.
-
-    This is not meant to be instantiated by the user directly, but rather
-    used with pydantic.Field to define the properties of a menu choice.
     """
 
-    description: str = Field(..., description="The text displayed for this menu item.")
+    description: str = Field(
+        ..., description="The text displayed for this menu item."
+    )
 
     action: Optional[Callable[..., Any]] = Field(
-        default=None,
-        description="The function or coroutine to execute when this item is selected.",
+        default=None, description="A function to execute when this item is selected."
+    )
+
+    target_menu: Optional[str] = Field(
+        default=None, description="The name of another registered menu to navigate to."
     )
 
     is_quit: bool = Field(
-        default=False,
-        description="If True, selecting this item will exit the current menu loop.",
+        default=False, description="If True, selecting this item will go back or exit."
     )
 
-    # This allows the model to be used without validation errors for callables
     class Config:
         arbitrary_types_allowed = True
