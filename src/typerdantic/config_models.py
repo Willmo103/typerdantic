@@ -6,6 +6,7 @@ from typing import Dict, Optional
 
 class MenuItemConfig(BaseModel):
     """Defines the structure for a single menu item in a config file."""
+
     description: str
     action: Optional[str] = Field(
         None,
@@ -18,5 +19,6 @@ class MenuItemConfig(BaseModel):
 
 class MenuConfig(BaseModel):
     """Defines the top-level structure for a menu configuration file."""
+
     doc: str = "Typerdantic Menu"
     items: Dict[str, MenuItemConfig]

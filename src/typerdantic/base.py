@@ -11,6 +11,7 @@ class TyperdanticMenu(BaseModel):
     A data container for a menu's content and state.
     This class is managed by a TyperdanticApp instance.
     """
+
     # Internal state
     _menu_items: List[Tuple[str, MenuItem]] = []
     _selected_index: int = 0
@@ -52,14 +53,21 @@ class TyperdanticMenu(BaseModel):
             fragments.append((style, f"{prefix}{item.description}\n"))
 
         if len(self._menu_items) > self._max_display_items:
-            fragments.append(("class:title", f"\n(Showing {len(visible_items)} of {len(self._menu_items)} items)"))
+            fragments.append(
+                (
+                    "class:title",
+                    f"\n(Showing {len(visible_items)} of {len(self._menu_items)} items)",
+                )
+            )
         return fragments
 
     def go_up(self):
         """Moves the selection up by one."""
         if not self._menu_items:
             return
-        self._selected_index = (self._selected_index - 1 + len(self._menu_items)) % len(self._menu_items)
+        self._selected_index = (self._selected_index - 1 + len(self._menu_items)) % len(
+            self._menu_items
+        )
         self._update_scroll()
 
     def go_down(self):
@@ -76,5 +84,5 @@ class TyperdanticMenu(BaseModel):
         return self._menu_items[self._selected_index][1]
 
     class Config:
-        extra = 'allow'
+        extra = "allow"
         arbitrary_types_allowed = True

@@ -39,7 +39,9 @@ def load_style_from_file(path: Path) -> Style:
 
         # Merge custom styles with defaults, allowing overrides
         merged_styles = DEFAULT_STYLE_DICT.copy()
-        if "style" in custom_style_data and isinstance(custom_style_data["style"], dict):
+        if "style" in custom_style_data and isinstance(
+            custom_style_data["style"], dict
+        ):
             merged_styles.update(custom_style_data["style"])
 
         return Style.from_dict(merged_styles)

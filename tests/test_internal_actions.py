@@ -17,6 +17,7 @@ sys.path.insert(0, str(project_root / "src"))
 
 # --- Define dummy actions for type hinting and as real objects if needed ---
 
+
 @register_action("say_hello")
 def hello_action():
     pass
@@ -30,8 +31,8 @@ async def async_work_action():
 class TestInternalActions(unittest.TestCase):
     # Patch the PromptSession to prevent hanging.
     # FIX: Update the patch target to the new, explicit path.
-    @patch('typerdantic.app.PromptSession')
-    @patch('typerdantic.executors.registry.get_action')
+    @patch("typerdantic.app.PromptSession")
+    @patch("typerdantic.executors.registry.get_action")
     def test_internal_action_execution(self, mock_get_action, MockPromptSession):
         """
         Tests that the app calls the correct registered internal actions
@@ -71,7 +72,9 @@ class TestInternalActions(unittest.TestCase):
         }
 
         menu_config = MenuConfig(**menu_dict)
-        DynamicInternalMenu = create_menu_from_config("DynamicInternalMenu", menu_config)
+        DynamicInternalMenu = create_menu_from_config(
+            "DynamicInternalMenu", menu_config
+        )
         app = TyperdanticApp(main_menu=DynamicInternalMenu)
 
         async def run_test_flow():
@@ -96,5 +99,6 @@ if __name__ == "__main__":
     # Clear the registry before running tests to ensure a clean state,
     # just in case this file is run directly multiple times.
     from typerdantic.registry import _ACTION_REGISTRY
+
     _ACTION_REGISTRY.clear()
     unittest.main()

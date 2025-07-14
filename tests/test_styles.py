@@ -38,7 +38,9 @@ title = "bold #ff00ff"      # Override default
 selected = "bg:#ffff00 #000000" # Override default
 new_class = "italic"        # Add a new style class
 """
-        with tempfile.NamedTemporaryFile("w", delete=False, suffix=".toml", encoding="utf-8") as tmp:
+        with tempfile.NamedTemporaryFile(
+            "w", delete=False, suffix=".toml", encoding="utf-8"
+        ) as tmp:
             tmp.write(custom_style_content)
             tmp_path = Path(tmp.name)
 
@@ -66,7 +68,9 @@ new_class = "italic"        # Add a new style class
         """
         print("\nRunning test: Fallback on malformed style file...")
         malformed_content = "this is not valid toml"
-        with tempfile.NamedTemporaryFile("w", delete=False, suffix=".toml", encoding="utf-8") as tmp:
+        with tempfile.NamedTemporaryFile(
+            "w", delete=False, suffix=".toml", encoding="utf-8"
+        ) as tmp:
             tmp.write(malformed_content)
             tmp_path = Path(tmp.name)
 

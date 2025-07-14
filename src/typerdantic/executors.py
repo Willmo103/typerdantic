@@ -14,15 +14,13 @@ async def run_command(command: str) -> Tuple[int, str, str]:
     Runs a shell command asynchronously and returns status and output.
     """
     process = await asyncio.create_subprocess_shell(
-        command,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
+        command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
     stdout, stderr = await process.communicate()
     return (
         process.returncode,
-        stdout.decode('utf-8', errors='ignore'),
-        stderr.decode('utf-8', errors='ignore')
+        stdout.decode("utf-8", errors="ignore"),
+        stderr.decode("utf-8", errors="ignore"),
     )
 
 
@@ -31,7 +29,9 @@ async def execute_action_string(action_string: str):
     Parses and executes an action string from a menu configuration.
     """
     if not isinstance(action_string, str):
-        print(f"\nError: Invalid action format. Expected a string, got {type(action_string)}")
+        print(
+            f"\nError: Invalid action format. Expected a string, got {type(action_string)}"
+        )
         return
 
     try:
@@ -39,7 +39,9 @@ async def execute_action_string(action_string: str):
         action_type = action_type.strip().lower()
         value = value.strip()
     except ValueError:
-        print(f"\nError: Invalid action format '{action_string}'. Expected 'type::value'.")
+        print(
+            f"\nError: Invalid action format '{action_string}'. Expected 'type::value'."
+        )
         return
 
     print(f"\nExecuting {action_type}: {value}")

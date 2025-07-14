@@ -16,11 +16,13 @@ def register_action(name: str):
         def some_function():
             print("Action running!")
     """
+
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         if name in _ACTION_REGISTRY:
             raise ValueError(f"Action with name '{name}' is already registered.")
         _ACTION_REGISTRY[name] = func
         return func
+
     return decorator
 
 

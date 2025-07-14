@@ -22,7 +22,9 @@ def create_menu_from_config(name: str, config: MenuConfig) -> Type[TyperdanticMe
         # create a partial function that calls our executor with that string.
         action_callable = None
         if item_config.action:
-            action_callable = functools.partial(execute_action_string, item_config.action)
+            action_callable = functools.partial(
+                execute_action_string, item_config.action
+            )
 
         # Create a MenuItem instance from the item's configuration
         menu_item = MenuItem(
@@ -37,11 +39,7 @@ def create_menu_from_config(name: str, config: MenuConfig) -> Type[TyperdanticMe
         field_definitions[item_name] = (MenuItem, Field(default=menu_item))
 
     # Use pydantic.create_model to build the class correctly
-    NewMenu = create_model(
-        name,
-        __base__=TyperdanticMenu,
-        **field_definitions
-    )
+    NewMenu = create_model(name, __base__=TyperdanticMenu, **field_definitions)
 
     # Set the docstring on the newly created class
     NewMenu.__doc__ = config.doc

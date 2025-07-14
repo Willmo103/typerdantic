@@ -10,7 +10,7 @@ from .models import MenuItem
 from .base import TyperdanticMenu
 from .app import TyperdanticApp
 from .styles import load_style_from_file
-from .loaders import create_menu_from_config
+
 
 __all__ = [
     "MenuItem",

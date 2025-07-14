@@ -1,7 +1,7 @@
 # src/typerdantic/app.py
 
 import asyncio
-from typing import Dict, Type, Optional
+from typing import Dict, Type, Optional, Callable, Any
 
 from prompt_toolkit.application import Application
 from prompt_toolkit.key_binding import KeyBindings
@@ -9,7 +9,6 @@ from prompt_toolkit.layout.containers import Window
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.layout.layout import Layout
 from prompt_toolkit.styles import Style
-# Corrected import: Use PromptSession for robust async prompting
 from prompt_toolkit.shortcuts import PromptSession
 
 from .base import TyperdanticMenu
@@ -19,25 +18,59 @@ from .styles import DEFAULT_STYLE
 
 class TyperdanticApp:
     """
-    A top-level application controller that manages and navigates between
-    multiple TyperdanticMenu instances within a single, persistent UI.
+    A top-level application controller that manages components, menus, and actions.
     """
 
     def __init__(self, main_menu: Type[TyperdanticMenu], style: Optional[Style] = None):
         self.menu_registry: Dict[str, Type[TyperdanticMenu]] = {"main": main_menu}
+        self.action_registry: Dict[str, Callable[..., Any]] = (
+            {}
+        )  # <-- Instance-level registry
         self.style = style or DEFAULT_STYLE
 
-        self.nav_stack: list[TyperdanticMenu] = [main_menu()]
+        self.nav_stack: list[TyperdanticMenu] = [main_menu(app=self)]
         self.active_menu: TyperdanticMenu = self.nav_stack[0]
 
-        self.layout = Layout(Window(FormattedTextControl(self._get_current_fragments, focusable=True)))
+        self.layout = Layout(
+            Window(FormattedTextControl(self._get_current_fragments, focusable=True))
+        )
         self.key_bindings = self._build_keybindings()
-        self.application: Application = Application(
+        self.application = Application(
             layout=self.layout,
             key_bindings=self.key_bindings,
             full_screen=True,
             style=self.style,
         )
+
+    def register_component(self, component):
+        """Registers a component's menus and actions with the app."""
+        component.register_with_app(self)
+
+    def register_menu(self, name: str, menu_class: Type[TyperdanticMenu]):
+        if name in self.menu_registry:
+            raise ValueError(f"Menu '{name}' is already registered.")
+        self.menu_registry[name] = menu_class
+
+    def register_action(self, name: str, func: Callable[..., Any]):
+        if name in self.action_registry:
+            raise ValueError(f"Action '{name}' is already registered.")
+        self.action_registry[name] = func
+
+    async def execute_action_string(self, action_string: str):
+        # This logic is now part of the app, where it has access to the registry
+        try:
+            action_type, value = action_string.split("::", 1)
+        except ValueError:
+            # Handle error
+            return
+
+        if action_type.lower() == "internal":
+            action_func = self.action_registry.get(value)
+            if action_func:
+                if asyncio.iscoroutinefunction(action_func):
+                    await action_func()
+                else:
+                    action_func()
 
     def _build_keybindings(self) -> KeyBindings:
         """Builds the keybindings for the entire application."""

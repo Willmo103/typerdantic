@@ -12,14 +12,17 @@ sys.path.insert(0, str(project_root / "src"))
 
 # --- Define Actions ---
 
+
 def change_setting():
     print("\n>>> Pretending to change a setting...")
+
 
 # --- Define Menus ---
 
 
 class SettingsMenu(TyperdanticMenu):
     """Configure application settings."""
+
     change_item: MenuItem = Field(
         default=MenuItem(description="Change a setting", action=change_setting)
     )
@@ -30,18 +33,20 @@ class SettingsMenu(TyperdanticMenu):
 
 class MainMenu(TyperdanticMenu):
     """This is the main menu."""
+
     explore: MenuItem = Field(
         default=MenuItem(description="Explore files (not implemented)")
     )
     settings: MenuItem = Field(
         default=MenuItem(
             description="Go to Settings",
-            target_menu="settings"  # This name must match a registered menu
+            target_menu="settings",  # This name must match a registered menu
         )
     )
     exit_app: MenuItem = Field(
         default=MenuItem(description="Exit Application", is_quit=True)
     )
+
 
 # --- Main execution block ---
 
@@ -55,6 +60,7 @@ async def main():
 
     # 3. Run the application
     await app.run()
+
 
 if __name__ == "__main__":
     print("Starting TyperdanticApp multi-menu test...")
