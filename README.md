@@ -2,63 +2,64 @@
 
 **Typerdantic** is a Python library for building powerful, interactive, and self-documenting command-line interface (CLI) menus. It combines the command-line elegance of [**Typer**](https://typer.tiangolo.com/), the robust data modeling of [**Pydantic**](https://docs.pydantic.dev/), and the rich terminal UI capabilities of [**prompt-toolkit**](https://python-prompt-toolkit.readthedocs.io/).
 
-The goal is to abstract away the boilerplate of creating interactive menus, allowing developers to define complex, multi-screen applications using simple Pydantic models.
+The goal is to abstract away the boilerplate of creating interactive menus, allowing developers to define complex, multi-screen applications using simple Pydantic models or configuration files.
 
 ---
 
 ## Core Features
 
-- **Declarative Menus**: Define your CLI menus, options, and actions using Pydantic models. The structure of your data model *is* the structure of your menu.
+- **Declarative & Dynamic Menus**: Define menus by subclassing `TyperdanticMenu` or generate them on the fly from configuration files (e.g., YAML, JSON) using a Pydantic-validated schema.
+- **External Action Execution**: Run shell commands and scripts directly from your menu configuration using action strings like `"command::echo Hello"` or `"script::./deploy.sh"`.
 - **Seamless Navigation**: A top-level `TyperdanticApp` controller manages a single, persistent UI, eliminating screen flashes when navigating between menus.
 - **Custom Styling**: Theme your entire application by loading a simple TOML style file.
-- **Self-Documenting**: Pydantic `Field` descriptions are automatically used as help text within the interactive UI.
-- **Asynchronous by Design**: Built with `asyncio` to handle user input and actions without blocking.
+- **Asynchronous by Design**: Built with `asyncio` to handle user input and execute subprocesses without blocking or freezing the UI.
 
 ---
 
 ## Example Usage
 
-Define your menus as classes inheriting from `TyperdanticMenu`.
+Define your menu in a configuration file, like `menu.yml`:
 
-```python
-# menus.py
-from typerdantic import TyperdanticMenu, MenuItem
-from pydantic import Field
+```yaml
+# file: menu.yml
+doc: My Awesome CLI
+items:
+  list_files:
+    description: List files in the current directory
+    action: "command::ls -l"
 
-class SettingsMenu(TyperdanticMenu):
-    """Configure application settings."""
-    change_item: MenuItem = Field(default=MenuItem(description="Change a setting"))
-    back: MenuItem = Field(default=MenuItem(description="Back to Main Menu", is_quit=True))
+  run_backup:
+    description: Run the backup script
+    action: "script::./scripts/backup.sh"
 
-class MainMenu(TyperdanticMenu):
-    """This is the main menu."""
-    settings: MenuItem = Field(
-        default=MenuItem(description="Go to Settings", target_menu="settings")
-    )
-    exit_app: MenuItem = Field(default=MenuItem(description="Exit", is_quit=True))
+  quit:
+    description: Exit the application
+    is_quit: true
 ```
 
-Then, create and run an application instance.
+Then, load and run your application:
 
 ```python
 # main.py
 import asyncio
+import yaml
 from pathlib import Path
-from typerdantic.app import TyperdanticApp
-from typerdantic.styles import load_style_from_file
-from menus import MainMenu, SettingsMenu
+from typerdantic import TyperdanticApp, create_menu_from_config
+from typerdantic.config_models import MenuConfig
 
 async def main():
-    # Load an optional custom style file
-    style = load_style_from_file(Path("styles.toml"))
+    # Load and parse the YAML configuration
+    config_path = Path("menu.yml")
+    with open(config_path, "r") as f:
+        config_dict = yaml.safe_load(f)
 
-    # Create the app with a main menu and custom style
-    app = TyperdanticApp(main_menu=MainMenu, style=style)
+    menu_config = MenuConfig(**config_dict)
 
-    # Register other menus
-    app.register_menu("settings", SettingsMenu)
+    # Create a menu class from the validated config
+    MyMenu = create_menu_from_config("MyMenu", menu_config)
 
-    # Run the application
+    # Create and run the app
+    app = TyperdanticApp(main_menu=MyMenu)
     await app.run()
 
 if __name__ == "__main__":
@@ -69,6 +70,7 @@ if __name__ == "__main__":
 
 ## Future Goals
 
-- **CLI Menu Builder**: An interactive command to help scaffold new `Typerdantic` menus and actions.
-- **More Widgets**: Support for more complex inputs like forms, confirmation dialogs, and progress bars.
-- **Plugin System**: Allow for custom actions and menu item types to be added easily.
+- **YAML/JSON Loaders**: Add convenience functions like `load_menu_from_yaml()` to simplify the loading process.
+- **Internal Action Registry**: Create a system for registering and calling internal Python functions via action strings (e.g., `"internal::backup_database"`).
+- **CLI Menu Builder**: An interactive command to help scaffold new `Typerdantic` apps, menus, and actions.
+- **More Widgets**: Support for forms, confirmation dialogs, and progress bars.

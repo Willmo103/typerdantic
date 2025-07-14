@@ -32,7 +32,7 @@ class TyperdanticApp:
 
         self.layout = Layout(Window(FormattedTextControl(self._get_current_fragments, focusable=True)))
         self.key_bindings = self._build_keybindings()
-        self.application = Application(
+        self.application: Application = Application(
             layout=self.layout,
             key_bindings=self.key_bindings,
             full_screen=True,
@@ -108,7 +108,7 @@ class TyperdanticApp:
                     else:
                         item.action()
                     # Create a session to use the async prompt
-                    session = PromptSession()
+                    session: PromptSession = PromptSession()
                     await session.prompt_async("\nPress Enter to continue...")
             else:  # Fallback for unsupported terminals
                 self.application.renderer.clear()

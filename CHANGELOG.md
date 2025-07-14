@@ -1,37 +1,50 @@
+# CHANGELOG.md
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## [0.6.0] - 2025-07-14
+
+### Added
+
+- **Configuration-Driven Menus**:
+  - New `config_models.py` module with Pydantic models (`MenuConfig`, `MenuItemConfig`) to define a strict schema for menu configurations.
+  - New `executors.py` module to handle the parsing and asynchronous execution of string-based actions (e.g., `"command::ls -l"`). This module safely runs subprocesses without blocking the UI's event loop.
+  - The `loaders.py` module was updated with `create_menu_from_config` to dynamically build menu classes from these validated configuration models.
+- **New Dependency**: Added `PyYAML` to support future loading from `.yml` files.
+- **New Test Module**: Added `tests/test_config_actions.py` to verify the new external action execution system.
+
+## [0.5.0] - 2025-07-14
+
+### Added
+
+- **Dynamic Menu Loading**:
+  - New `loaders.py` module with `create_menu_from_dict` function to dynamically build `TyperdanticMenu` classes from Python dictionaries.
+
+### Fixed
+
+- **Menu Title Display**: Cleaned up menu title rendering to be a single, clean line.
 
 ## [0.4.0] - 2025-07-13
 
 ### Changed
 
-- **Major Architectural Refactor for Seamless Navigation**:
-  - The `TyperdanticApp` now manages a single, long-running `prompt-toolkit` application instance. This provides a smooth, flash-free experience when navigating between menus.
-  - The `TyperdanticMenu` class has been simplified into a pure data and state container, with all rendering and key-handling logic now managed by the `TyperdanticApp`.
-  - The complex and buggy `KeyBindingProxy` was removed in favor of a centralized key-handling system in `TyperdanticApp`.
+- **Major Architectural Refactor**: Implemented a single, long-running application instance for seamless, flash-free menu navigation.
 
 ### Fixed
 
-- **Fixed Application Hang**: Replaced the blocking `input()` call with an asynchronous `PromptSession().prompt_async()` after an action is executed. This resolves the critical bug where the application would freeze.
-- **Fixed Pydantic Validation Errors**: The new architecture resolves the circular dependency between `TyperdanticApp` and `TyperdanticMenu`, eliminating the `ValidationError` and `PydanticUserError` on startup.
-- **Fixed `ImportError`**: Corrected the import for async prompting to use `PromptSession`, which is more robust across different `prompt-toolkit` versions.
+- **Application Hang**: Replaced blocking `input()` with an asynchronous `PromptSession`.
+- **Pydantic and Import Errors**: Resolved circular dependency issues.
 
 ## [0.2.0] - 2025-07-13
 
 ### Added
 
-- **Custom Styling System**:
-  - New `styles.py` module with `DEFAULT_STYLE` and `load_style_from_file` function.
-  - `TyperdanticApp` and `TyperdanticMenu` now accept a `style` argument to theme the UI.
-- **New Test Module**: Added `tests/test_styles.py`.
-
-### Changed
-
-- **Decoupled Actions**: `TyperdanticMenu.run()` now returns the `MenuItem` instead of executing the action internally.
+- **Custom Styling System**: Added `styles.py` module and support for loading themes from TOML files.
 
 ## [0.1.0] - 2025-07-12
 
 ### Added
 
-- Initial project structure, core models (`MenuItem`), base classes (`TyperdanticMenu`, `TyperdanticApp`), and documentation.
+- Initial project structure, core models, and base classes.

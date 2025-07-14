@@ -2,8 +2,7 @@
 
 from pydantic import Field
 
-from typerdantic.app import TyperdanticApp
-from . import TyperdanticMenu, MenuItem
+from . import TyperdanticMenu, MenuItem, TyperdanticApp
 import asyncio
 import sys
 from pathlib import Path
