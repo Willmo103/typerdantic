@@ -1,6 +1,8 @@
 # file: tests/test_menu.py
 
 from pydantic import Field
+
+from typerdantic.app import TyperdanticApp
 from . import TyperdanticMenu, MenuItem
 import asyncio
 import sys
@@ -68,12 +70,19 @@ class TestMenu(TyperdanticMenu):
 
 async def main():
     """The main entry point for the test."""
-    menu = TestMenu()
-    await menu.run()
+
+    # 1. Create the app with the TestMenu as the main menu
+    app = TyperdanticApp(main_menu=TestMenu)
+
+    # 2. Register the TestMenu
+    app.register_menu("test", TestMenu)
+
+    # 3. Run the application
+    print("Starting Typerdantic interactive test...")
+    await app.run()
 
 
 if __name__ == "__main__":
-    print("Starting Typerdantic interactive test...")
     try:
         asyncio.run(main())
         print("Test finished cleanly.")

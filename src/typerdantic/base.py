@@ -3,28 +3,19 @@
 from pydantic import BaseModel
 from typing import List, Tuple, Optional
 
-from prompt_toolkit.application import Application
-from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.layout.containers import Window
-from prompt_toolkit.layout.controls import FormattedTextControl
-from prompt_toolkit.layout.layout import Layout
-from prompt_toolkit.styles import Style
-
 from .models import MenuItem
 
 
 class TyperdanticMenu(BaseModel):
     """
-    A base class for creating interactive menus from Pydantic models.
-
-    Subclass this and define your menu items using `MenuItem` fields.
+    A data container for a menu's content and state.
+    This class is managed by a TyperdanticApp instance.
     """
-
-    # Internal state, excluded from Pydantic model
+    # Internal state
     _menu_items: List[Tuple[str, MenuItem]] = []
     _selected_index: int = 0
     _scroll_offset: int = 0
-    _max_display_items: int = 10  # Max items to show at once.
+    _max_display_items: int = 10
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -39,20 +30,20 @@ class TyperdanticMenu(BaseModel):
         return items
 
     def _update_scroll(self):
-        """Adjusts the scroll offset based on the selected index."""
+        """Adjusts the scroll offset to keep the selection in view."""
         if self._selected_index >= self._scroll_offset + self._max_display_items:
             self._scroll_offset = self._selected_index - self._max_display_items + 1
         elif self._selected_index < self._scroll_offset:
             self._scroll_offset = self._selected_index
 
-    def _get_display_fragments(self):
-        """Generates the text to be displayed in the terminal, handling scrolling."""
+    def get_display_fragments(self):
+        """Generates the text to be displayed in the terminal."""
         fragments = [("class:title", f"--- {self.__doc__ or 'Select an option:'} ---\n")]
         start, end = self._scroll_offset, self._scroll_offset + self._max_display_items
         visible_items = self._menu_items[start:end]
 
         for i, (name, item) in enumerate(visible_items, start=start):
-            style = "class:selected" if i == self._selected_index else ""
+            style = "class:selected" if i == self._selected_index else "class:menu-item"
             prefix = "> " if i == self._selected_index else "  "
             fragments.append((style, f"{prefix}{item.description}\n"))
 
@@ -60,42 +51,26 @@ class TyperdanticMenu(BaseModel):
             fragments.append(("class:title", f"\n(Showing {len(visible_items)} of {len(self._menu_items)} items)"))
         return fragments
 
-    async def run(self) -> Optional[MenuItem]:
-        """
-        Renders the menu and handles user interaction.
-        Returns the selected MenuItem or None if the user quits.
-        """
+    def go_up(self):
+        """Moves the selection up by one."""
+        if not self._menu_items:
+            return
+        self._selected_index = (self._selected_index - 1 + len(self._menu_items)) % len(self._menu_items)
+        self._update_scroll()
+
+    def go_down(self):
+        """Moves the selection down by one."""
+        if not self._menu_items:
+            return
+        self._selected_index = (self._selected_index + 1) % len(self._menu_items)
+        self._update_scroll()
+
+    def get_selected_item(self) -> Optional[MenuItem]:
+        """Returns the currently selected menu item."""
         if not self._menu_items:
             return None
-
-        kb = KeyBindings()
-
-        @kb.add("up")
-        def _(event):
-            self._selected_index = (self._selected_index - 1 + len(self._menu_items)) % len(self._menu_items)
-            self._update_scroll()
-
-        @kb.add("down")
-        def _(event):
-            self._selected_index = (self._selected_index + 1) % len(self._menu_items)
-            self._update_scroll()
-
-        @kb.add("enter")
-        async def _(event):
-            """This handler is now async."""
-            selected_item = self._menu_items[self._selected_index][1]
-            event.app.exit(result=selected_item)
-
-        @kb.add("c-c", "q")
-        async def _(event):
-            """This handler is now async."""
-            event.app.exit(result=None)
-
-        layout = Layout(Window(FormattedTextControl(self._get_display_fragments, focusable=True)))
-        style = Style.from_dict({"title": "bold underline", "selected": "bg:#0055aa #ffffff bold"})
-        app = Application(layout=layout, key_bindings=kb, full_screen=True, style=style)
-
-        return await app.run_async()
+        return self._menu_items[self._selected_index][1]
 
     class Config:
         extra = 'allow'
+        arbitrary_types_allowed = True

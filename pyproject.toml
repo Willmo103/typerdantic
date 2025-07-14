@@ -1,9 +1,7 @@
 [project]
 name = "typerdantic-project"
 version = "0.1.1"
-description = "**Typerdantic** is a Python library for building powerful, interactive, and self-documenting command-line interface (CLI) menus. It combines the command-line elegance of [**Typer**](https://typer.tiangolo.com/), the robust data modeling of [**Pydantic**](https://docs.pydantic.dev/), and the rich terminal UI capabilities of [**prompt-toolkit**](https://python-prompt-toolkit.readthedocs.io/).
-
-The goal is to abstract away the boilerplate of creating interactive menus, allowing developers to define complex, multi-screen applications using simple Pydantic models."
+description = "**Typerdantic** is a Python library for building powerful, interactive, and self-documenting command-line interface (CLI) menus. It combines the command-line elegance of [**Typer**](https://typer.tiangolo.com/), the robust data modeling of [**Pydantic**](https://docs.pydantic.dev/), and the rich terminal UI capabilities of [**prompt-toolkit**](https://python-prompt-toolkit.readthedocs.io/)."
 readme = "README.md"
 authors = [
     { name = "Will Morris", email = "willmorris103@gmail.com" }

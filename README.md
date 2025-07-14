@@ -9,7 +9,7 @@ The goal is to abstract away the boilerplate of creating interactive menus, allo
 ## Core Features
 
 - **Declarative Menus**: Define your CLI menus, options, and actions using Pydantic models. The structure of your data model *is* the structure of your menu.
-- **App Controller**: A top-level `TyperdanticApp` controller manages navigation between different menus, enabling multi-screen applications.
+- **Seamless Navigation**: A top-level `TyperdanticApp` controller manages a single, persistent UI, eliminating screen flashes when navigating between menus.
 - **Custom Styling**: Theme your entire application by loading a simple TOML style file.
 - **Self-Documenting**: Pydantic `Field` descriptions are automatically used as help text within the interactive UI.
 - **Asynchronous by Design**: Built with `asyncio` to handle user input and actions without blocking.
@@ -72,5 +72,3 @@ if __name__ == "__main__":
 - **CLI Menu Builder**: An interactive command to help scaffold new `Typerdantic` menus and actions.
 - **More Widgets**: Support for more complex inputs like forms, confirmation dialogs, and progress bars.
 - **Plugin System**: Allow for custom actions and menu item types to be added easily.
-
----
