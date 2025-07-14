@@ -1,32 +1,24 @@
 # src/typerdantic/executors.py
 
 import asyncio
+import shlex
 from typing import Tuple
+
+from . import registry  # <-- More explicit import
 
 # --- Action Executor ---
 
 
-async def run_command(command: str) -> Tuple[int | None, str, str]:
+async def run_command(command: str) -> Tuple[int, str, str]:
     """
     Runs a shell command asynchronously and returns status and output.
-
-    Args:
-        command: The command string to execute.
-
-    Returns:
-        A tuple of (return_code, stdout, stderr).
     """
-
-    # We run the blocking subprocess call in a separate thread
-    # to avoid freezing the asyncio event loop.
     process = await asyncio.create_subprocess_shell(
         command,
         stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
     )
-
     stdout, stderr = await process.communicate()
-
     return (
         process.returncode,
         stdout.decode('utf-8', errors='ignore'),
@@ -52,11 +44,19 @@ async def execute_action_string(action_string: str):
 
     print(f"\nExecuting {action_type}: {value}")
 
-    if action_type in ["command", "script"]:
-        # For both 'command' and 'script', we execute a shell command.
-        # The distinction can be handled by the caller if needed (e.g., checking file existence).
-        return_code, stdout, stderr = await run_command(value)
+    if action_type == "internal":
+        # Use the explicit path to look up the action
+        action_func = registry.get_action(value)
+        if action_func:
+            if asyncio.iscoroutinefunction(action_func):
+                await action_func()
+            else:
+                action_func()
+        else:
+            print(f"\nError: Internal action '{value}' not found in registry.")
 
+    elif action_type in ["command", "script"]:
+        return_code, stdout, stderr = await run_command(value)
         print("-" * 20)
         if stdout:
             print("Output:\n" + stdout)
@@ -64,10 +64,6 @@ async def execute_action_string(action_string: str):
             print("Errors:\n" + stderr)
         print(f"Process finished with exit code: {return_code}")
         print("-" * 20)
-
-    elif action_type == "python":
-        # In the future, this could execute a Python script or string
-        print("\n'python::' action type is not yet implemented.")
 
     else:
         print(f"\nError: Unknown action type '{action_type}'.")

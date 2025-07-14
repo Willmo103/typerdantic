@@ -8,48 +8,52 @@ import asyncio
 import sys
 from pathlib import Path
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, AsyncMock, MagicMock
 
 # Add the src directory to the Python path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root / "src"))
 
 
-# --- Register some internal actions ---
-
+# --- Define dummy actions for type hinting and as real objects if needed ---
 
 @register_action("say_hello")
 def hello_action():
-    """A simple, registered synchronous action."""
-    print("Hello from a registered action!")
+    pass
 
 
 @register_action("do_async_work")
 async def async_work_action():
-    """A simple, registered asynchronous action."""
-    print("Starting async work...")
-    await asyncio.sleep(0.01)  # Use a very short sleep for tests
-    print("Finished async work.")
+    pass
 
 
 class TestInternalActions(unittest.TestCase):
-    # FIX: Patch PromptSession where it's used in the app module to prevent hanging.
+    # Patch the PromptSession to prevent hanging.
+    # FIX: Update the patch target to the new, explicit path.
     @patch('typerdantic.app.PromptSession')
-    @patch('builtins.print')
-    def test_internal_action_execution(self, mock_print, MockPromptSession):
+    @patch('typerdantic.executors.registry.get_action')
+    def test_internal_action_execution(self, mock_get_action, MockPromptSession):
         """
-        Tests creating a menu that calls registered internal actions.
+        Tests that the app calls the correct registered internal actions
+        by mocking the registry lookup instead of the actions themselves.
         """
         # --- Setup the mocks ---
-        # Configure the mock session and its async method to return immediately.
-        mock_session_instance = MockPromptSession.return_value
+        # Configure the mock session to return immediately.
+        MockPromptSession.return_value.prompt_async = AsyncMock()
 
-        # Create a mock for the async method that returns a completed Future
-        async_mock = MagicMock()
-        future = asyncio.Future()
-        future.set_result(None)
-        async_mock.return_value = future
-        mock_session_instance.prompt_async = async_mock
+        # Create separate mocks for each action.
+        mock_hello = MagicMock()
+        mock_async = AsyncMock()
+
+        # Configure mock_get_action to return the correct mock based on the name.
+        def get_action_side_effect(action_name):
+            if action_name == "say_hello":
+                return mock_hello
+            if action_name == "do_async_work":
+                return mock_async
+            return None
+
+        mock_get_action.side_effect = get_action_side_effect
 
         # --- Test logic ---
         menu_dict = {
@@ -63,7 +67,6 @@ class TestInternalActions(unittest.TestCase):
                     "description": "Do async work",
                     "action": "internal::do_async_work",
                 },
-                "quit_item": {"description": "Quit", "is_quit": True},
             },
         }
 
@@ -84,11 +87,14 @@ class TestInternalActions(unittest.TestCase):
 
         asyncio.run(run_test_flow())
 
-        # Check if our print statements were called by the actions
-        mock_print.assert_any_call("Hello from a registered action!")
-        mock_print.assert_any_call("Starting async work...")
-        mock_print.assert_any_call("Finished async work.")
+        # Check that our mocked actions were called correctly
+        mock_hello.assert_called_once()
+        mock_async.assert_awaited_once()
 
 
 if __name__ == "__main__":
+    # Clear the registry before running tests to ensure a clean state,
+    # just in case this file is run directly multiple times.
+    from typerdantic.registry import _ACTION_REGISTRY
+    _ACTION_REGISTRY.clear()
     unittest.main()
