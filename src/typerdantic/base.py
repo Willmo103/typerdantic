@@ -24,7 +24,8 @@ class TyperdanticMenu(BaseModel):
     def _discover_menu_items(self) -> List[Tuple[str, MenuItem]]:
         """Finds all MenuItem fields defined on the subclass."""
         items = []
-        for name, field_info in self.model_fields.items():
+        # FIX: Use self.__class__.model_fields to avoid Pydantic deprecation warning.
+        for name, field_info in self.__class__.model_fields.items():
             if isinstance(field_info.default, MenuItem):
                 items.append((name, field_info.default))
         return items
@@ -38,7 +39,10 @@ class TyperdanticMenu(BaseModel):
 
     def get_display_fragments(self):
         """Generates the text to be displayed in the terminal."""
-        fragments = [("class:title", f"--- {self.__doc__ or 'Select an option:'} ---\n")]
+        title = self.__doc__ or "Select an option:"
+        cleaned_title = title.strip().splitlines()[0]
+
+        fragments = [("class:title", f"--- {cleaned_title} ---\n")]
         start, end = self._scroll_offset, self._scroll_offset + self._max_display_items
         visible_items = self._menu_items[start:end]
 
