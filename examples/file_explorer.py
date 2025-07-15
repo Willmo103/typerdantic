@@ -74,5 +74,4 @@ class FileExplorerComponent(TyperdanticComponent):
                 items.append(
                     ("error", MenuItem(description=f"Error reading directory: {e}"))
                 )
-
             return items
