@@ -1,0 +1,25 @@
+{
+    "tasks": [
+        {
+            "name": "List Files",
+            "description": "List all files in the current directory.",
+            "action": "command::dir /b"
+        },
+        {
+            "name": "Say Hello",
+            "description": "Run a friendly Python greeting.",
+            "action": "internal::greet"
+        },
+        {
+            "name": "Create Report",
+            "description": "Generate a new report file.",
+            "action": "internal::generate_report",
+            "prompt_args": [
+                {
+                    "name": "report_name",
+                    "prompt": "Enter the name for the report"
+                }
+            ]
+        }
+    ]
+}
