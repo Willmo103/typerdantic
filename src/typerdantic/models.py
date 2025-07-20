@@ -9,9 +9,7 @@ class MenuItem(BaseModel):
     Represents a single, selectable item within a TyperdanticMenu.
     """
 
-    description: str = Field(
-        ..., description="The text displayed for this menu item."
-    )
+    description: str = Field(..., description="The text displayed for this menu item.")
     action: Optional[Callable[..., Any]] = Field(
         default=None,
         description="A function to execute when this item is selected.",

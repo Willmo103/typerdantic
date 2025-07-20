@@ -74,11 +74,10 @@ async def execute_action_string(
 
         if action_type == "script":
             script_path = Path(command_to_run)
-            if (
-                sys.platform == "win32"
-                and script_path.suffix.lower() == ".ps1"
-            ):
-                command_to_run = f'powershell.exe -ExecutionPolicy Bypass -File "{script_path}"'
+            if sys.platform == "win32" and script_path.suffix.lower() == ".ps1":
+                command_to_run = (
+                    f'powershell.exe -ExecutionPolicy Bypass -File "{script_path}"'
+                )
             elif script_path.suffix.lower() in [".sh", ".bash"]:
                 command_to_run = f'bash "{script_path}"'
             elif script_path.suffix.lower() in [".bat", ".cmd"]:

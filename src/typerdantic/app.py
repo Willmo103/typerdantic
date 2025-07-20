@@ -95,14 +95,19 @@ class TyperdanticApp:
         action_was_run = False
         if item.action:
             action_was_run = True
-            # The action can be a callable function or a string to be executed
+
+            # Construct the context dictionary to pass to actions.
+            context = {"app": self, "menu": self.active_menu}
+
+            # The action can be a callable function or a string to be executed.
+            # The functools.partial in the loader has already pre-filled the
+            # action_string and args for config-driven menus.
             if callable(item.action):
+                # For direct callable actions (non-config), we still need to pass args.
                 if asyncio.iscoroutinefunction(item.action):
-                    await item.action()
+                    await item.action(context=context, args=item.args)
                 else:
-                    item.action()
-            elif isinstance(item.action, str):
-                await execute_action_string(item.action)
+                    item.action(context=context, args=item.args)
 
             # After an action, we might need to refresh the menu view
             self.active_menu.refresh_items()
