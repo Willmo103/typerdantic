@@ -128,3 +128,4 @@ test_results.txt
 *RunCodeFlattener*.ps1
 *_codebase_v*.md
 logs
+release.ps1
