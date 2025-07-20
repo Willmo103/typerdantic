@@ -54,19 +54,13 @@ class TestMenu(TyperdanticMenu):
     item_12: MenuItem = Field(default=MenuItem(description="Item 12"))
 
     sync_item: MenuItem = Field(
-        default=MenuItem(
-            description="Run a Synchronous Action", action=sync_action
-        )
+        default=MenuItem(description="Run a Synchronous Action", action=sync_action)
     )
     async_item: MenuItem = Field(
-        default=MenuItem(
-            description="Run an Asynchronous Action", action=async_action
-        )
+        default=MenuItem(description="Run an Asynchronous Action", action=async_action)
     )
 
-    quit_item: MenuItem = Field(
-        default=MenuItem(description="Quit", is_quit=True)
-    )
+    quit_item: MenuItem = Field(default=MenuItem(description="Quit", is_quit=True))
 
 
 # --- Main execution block ---

@@ -65,10 +65,7 @@ async def execute_action_string(action_string: str):
         if action_type == "script":
             script_path = Path(value)
             # For PowerShell scripts on Windows, explicitly call powershell.exe.
-            if (
-                sys.platform == "win32"
-                and script_path.suffix.lower() == ".ps1"
-            ):
+            if sys.platform == "win32" and script_path.suffix.lower() == ".ps1":
                 command_to_run = f'powershell.exe -File "{script_path}"'
             # For Python scripts, it's good practice to use the current interpreter.
             elif script_path.suffix.lower() == ".py":

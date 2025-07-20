@@ -22,23 +22,15 @@ class TyperdanticApp:
     A top-level application controller that manages and navigates between menus.
     """
 
-    def __init__(
-        self, main_menu: Type[TyperdanticMenu], style: Optional[Style] = None
-    ):
-        self.menu_registry: Dict[str, Type[TyperdanticMenu]] = {
-            "main": main_menu
-        }
+    def __init__(self, main_menu: Type[TyperdanticMenu], style: Optional[Style] = None):
+        self.menu_registry: Dict[str, Type[TyperdanticMenu]] = {"main": main_menu}
         self.style = style or DEFAULT_STYLE
 
         self.nav_stack: list[TyperdanticMenu] = [main_menu(app=self)]
         self.active_menu: TyperdanticMenu = self.nav_stack[0]
 
         self.layout = Layout(
-            Window(
-                FormattedTextControl(
-                    self._get_current_fragments, focusable=True
-                )
-            )
+            Window(FormattedTextControl(self._get_current_fragments, focusable=True))
         )
         self.key_bindings = self._build_keybindings()
         self.application: Application = Application(

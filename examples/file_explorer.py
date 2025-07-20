@@ -36,15 +36,19 @@ class FileExplorerMenu(TyperdanticMenu):
 
         try:
             # Sort with directories first
-            entries = sorted(os.scandir(self.current_path), key=lambda e: (not e.is_dir(), e.name.lower()))
+            entries = sorted(
+                os.scandir(self.current_path),
+                key=lambda e: (not e.is_dir(), e.name.lower()),
+            )
             for entry in entries:
                 prefix = "[D]" if entry.is_dir() else "[F]"
                 item = MenuItem(
-                    description=f"{prefix} {entry.name}",
-                    action=self.view_details
+                    description=f"{prefix} {entry.name}", action=self.view_details
                 )
                 items.append((entry.name, item))
         except OSError as e:
-            items.append(("error", MenuItem(description=f"Error reading directory: {e}")))
+            items.append(
+                ("error", MenuItem(description=f"Error reading directory: {e}"))
+            )
 
         return items

@@ -24,9 +24,7 @@ class TestConfigActions(unittest.TestCase):
         self.script_path = self.tmp_path / "test_script.ps1"
         self.script_output_path = self.tmp_path / "script_output.txt"
         # Use a simple command that works on both Windows and Unix-like systems
-        self.script_path.write_text(
-            f'echo "script ran" > "{self.script_output_path}"'
-        )
+        self.script_path.write_text(f'echo "script ran" > "{self.script_output_path}"')
 
     def tearDown(self):
         """Clean up the temporary directory."""
@@ -62,9 +60,7 @@ class TestConfigActions(unittest.TestCase):
         menu_config = MenuConfig(**menu_dict)
 
         # Create the menu class from the validated config
-        DynamicActionMenu = create_menu_from_config(
-            "DynamicActionMenu", menu_config
-        )
+        DynamicActionMenu = create_menu_from_config("DynamicActionMenu", menu_config)
 
         # We need to run the app to test the actions
         app = TyperdanticApp(main_menu=DynamicActionMenu)
@@ -86,9 +82,7 @@ class TestConfigActions(unittest.TestCase):
 
         # Assert that the output files were created with the correct content
         self.assertTrue(command_output_path.exists())
-        content_from_command = (
-            command_output_path.read_text().strip().strip('"')
-        )
+        content_from_command = command_output_path.read_text().strip().strip('"')
         self.assertEqual(content_from_command, "command ran")
 
         self.assertTrue(self.script_output_path.exists())

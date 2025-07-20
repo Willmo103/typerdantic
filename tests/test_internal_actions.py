@@ -33,9 +33,7 @@ class TestInternalActions(unittest.TestCase):
     # FIX: Update the patch target to the new, explicit path.
     @patch("typerdantic.app.PromptSession")
     @patch("typerdantic.executors.registry.get_action")
-    def test_internal_action_execution(
-        self, mock_get_action, MockPromptSession
-    ):
+    def test_internal_action_execution(self, mock_get_action, MockPromptSession):
         """
         Tests that the app calls the correct registered internal actions
         by mocking the registry lookup instead of the actions themselves.

@@ -10,9 +10,7 @@ from .config_models import MenuConfig
 from .executors import execute_action_string
 
 
-def create_menu_from_config(
-    name: str, config: MenuConfig
-) -> Type[TyperdanticMenu]:
+def create_menu_from_config(name: str, config: MenuConfig) -> Type[TyperdanticMenu]:
     """
     Dynamically creates a TyperdanticMenu subclass from a MenuConfig object
     using Pydantic's `create_model` utility.
