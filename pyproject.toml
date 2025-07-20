@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "typerdantic"
-version = "1.0.1"
+version = "1.0.2"
 authors = [
   { name="Will Morris", email="willmorris103@gmail.com" },
 ]
@@ -20,10 +20,17 @@ dependencies = [
     "pydantic>=2.0",
     "prompt-toolkit>=3.0",
     "tomli; python_version < '3.11'",
+    "click>=8.1.8",
 ]
 
 [project.urls]
 "Homepage" = "https://github.com/Willmo103/typerdantic"
 "Bug Tracker" = "https://github.com/Willmo103/typerdantic/issues"
+
+[dependency-groups]
+dev = [
+    "black>=24.8.0",
+]
+
 
 
