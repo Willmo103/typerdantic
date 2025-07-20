@@ -1,33 +1,23 @@
 # src/typerdantic/config_models.py
 
 from pydantic import BaseModel, Field
-from typing import Dict, Optional, Any, Union
+from typing import Dict, Optional, Any, Union, List
+
+
+class ArgumentSpec(BaseModel):
+    """Defines a specification for an argument to be prompted for at runtime."""
+
+    name: str = Field(..., description="The name of the argument variable.")
+    prompt: str = Field(..., description="The message to display to the user.")
+    default: Optional[Any] = Field(
+        None,
+        description="An optional default value if the user enters nothing.",
+    )
 
 
 class ActionConfig(BaseModel):
     """
     Defines a structured action with a type, a value, and optional arguments.
-
-    This model is useful for defining actions in a menu configuration file,
-    allowing for both simple and complex actions to be executed by the application.
-    Args:
-        type: The type of action (e.g., 'internal', 'command', 'script').
-        value: The target of the action (e.g., function name, command string).
-        args: Optional dictionary of arguments to pass to the action.
-    Raises:
-        ValueError: If the action type is not recognized or if the value is not a valid action target.
-    Examples:
-    ```json
-        "action": "command::ls -l"
-    ```
-
-    ```json
-        "action": {
-            "type": "internal",
-            "value": "my_func",
-            "args": {"name": "World"},
-        }
-    ```
     """
 
     type: str = Field(
@@ -39,8 +29,11 @@ class ActionConfig(BaseModel):
         description="The target of the action (e.g., function name, command string).",
     )
     args: Optional[Dict[str, Any]] = Field(
+        default=None, description="A dictionary of pre-defined arguments."
+    )
+    prompt_args: Optional[List[ArgumentSpec]] = Field(
         default=None,
-        description="A dictionary of arguments to pass to the action.",
+        description="A list of arguments to prompt for at runtime.",
     )
 
 
