@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog,
 and this project adheres to Semantic Versioning.
 
+## **[1.1.0] - 2025-07-20**
+
+### **Added**
+
+* **Runtime Argument Prompting**: Actions defined in config files can now prompt the user for arguments when selected.
+* **Structured Action Configuration**: Introduced ActionConfig and ArgumentSpec Pydantic models for more robust and readable action definitions in TOML files.
+* **Action Context**: Registered internal:: actions now receive a context dictionary containing the TyperdanticApp instance and the active menu.
+* **Expanded Script Support**: The script:: action executor now explicitly handles .sh, .bash, .bat, .cmd, and .js files.
+
+### **Changed**
+
+* The execute\_action\_string function now accepts context and args parameters.
+* MenuItem model now includes args and prompt\_args fields to support advanced action configurations.
+* TyperdanticApp.handle\_selection was refactored to support suspending the application to prompt for user input.
+
+## **[1.0.2] - 2025-07-19**
+
+### **Fixed**
+
+* Corrected uv build command in the release.ps1 script.
+* Addressed dependency resolution warnings when installing in a global environment by recommending virtual environments.
+
 ---
 
 ## **[1.0.0] - 2025-07-19**

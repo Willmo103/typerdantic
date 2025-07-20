@@ -14,7 +14,6 @@ from prompt_toolkit.shortcuts import PromptSession
 from .base import TyperdanticMenu
 from .models import MenuItem
 from .styles import DEFAULT_STYLE
-from .executors import execute_action_string
 
 
 class TyperdanticApp:
@@ -96,23 +95,38 @@ class TyperdanticApp:
         if item.action:
             action_was_run = True
 
-            # Construct the context dictionary to pass to actions.
+            # Combine pre-defined args with runtime-prompted args
+            final_args = item.args.copy() if item.args else {}
+
+            # --- NEW: Prompt for runtime arguments ---
+            if item.prompt_args:
+                # Temporarily exit the full-screen app to use the prompt
+                self.application.suspend_to_background()
+                try:
+                    session: PromptSession = PromptSession()
+                    for arg_spec in item.prompt_args:
+                        user_input = await session.prompt_async(
+                            f"{arg_spec.prompt}: ",
+                            default=str(arg_spec.default or ""),
+                        )
+                        final_args[arg_spec.name] = user_input
+                finally:
+                    # Ensure we always resume the application
+                    self.application.resume_from_background()
+
             context = {"app": self, "menu": self.active_menu}
 
-            # The action can be a callable function or a string to be executed.
-            # The functools.partial in the loader has already pre-filled the
-            # action_string and args for config-driven menus.
             if callable(item.action):
-                # For direct callable actions (non-config), we still need to pass args.
                 if asyncio.iscoroutinefunction(item.action):
-                    await item.action(context=context, args=item.args)
+                    await item.action(context=context, args=final_args)
                 else:
-                    item.action(context=context, args=item.args)
+                    item.action(context=context, args=final_args)
 
-            # After an action, we might need to refresh the menu view
             self.active_menu.refresh_items()
-            session: PromptSession = PromptSession()
-            await session.prompt_async("\nPress Enter to continue...")
+            # No need for a separate "Press Enter" prompt, as the prompt session handles it
+            if not item.prompt_args:
+                session = PromptSession()
+                await session.prompt_async("\nPress Enter to continue...")
 
         if item.target_menu:
             self.navigate_to(item.target_menu)

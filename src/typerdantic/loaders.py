@@ -19,29 +19,31 @@ def create_menu_from_config(name: str, config: MenuConfig) -> Type[TyperdanticMe
     for item_name, item_config in config.items.items():
         action_callable = None
         action_args = None
+        prompt_args = None
         action_string = None
 
         if isinstance(item_config.action, str):
-            # Handle simple string actions
             action_string = item_config.action
         elif isinstance(item_config.action, ActionConfig):
-            # Handle structured ActionConfig objects
             action_string = f"{item_config.action.type}::{item_config.action.value}"
             action_args = item_config.action.args
+            prompt_args = item_config.action.prompt_args  # <-- Get prompt_args
 
         if action_string:
-            # Create a partial function that calls our executor, now including args.
             action_callable = functools.partial(
-                execute_action_string, action_string, args=action_args
+                execute_action_string,
+                action_string,
+                # Pass pre-defined args to the partial. Runtime args will be handled by the app.
+                args=action_args,
             )
 
-        # Create a MenuItem instance, passing the arguments.
         menu_item = MenuItem(
             description=item_config.description,
             action=action_callable,
             target_menu=item_config.target_menu,
             is_quit=item_config.is_quit,
-            args=action_args,  # Store args on the MenuItem as well
+            args=action_args,
+            prompt_args=prompt_args,  # <-- Pass prompt_args to the MenuItem
         )
 
         field_definitions[item_name] = (MenuItem, Field(default=menu_item))
