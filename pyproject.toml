@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "typerdantic"
-version = "1.0.3"
+version = "1.1.0"
 authors = [
   { name="Will Morris", email="willmorris103@gmail.com" },
 ]
@@ -31,6 +31,7 @@ dependencies = [
 dev = [
     "black>=24.8.0",
 ]
+
 
 
 
