@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "typerdantic"
 version = "1.0.0"
 authors = [
-  { name="Will Morris", email="<willmorris103@gmail.com>" },
+  { name="Will Morris", email="willmorris103@gmail.com" },
 ]
 description = "A library for creating declarative, interactive CLI menus with Pydantic and prompt-toolkit."
 readme = "README.md"

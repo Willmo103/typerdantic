@@ -9,7 +9,7 @@ from prompt_toolkit.styles import Style
 # Define the default style dictionary for the application
 DEFAULT_STYLE_DICT: Dict[str, str] = {
     "title": "bold underline",
-    "selected": "bg:#0055aa #ffffff bold",
+    "selected": "bg:#0055aa fg:#ffffff bold",
     "menu-item": "",  # Default style for non-selected items
 }
 
