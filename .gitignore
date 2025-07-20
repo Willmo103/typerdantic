@@ -123,9 +123,5 @@ test_results.txt
 *_codebase_v*.md
 logs
 test_results.txt
-
-.dev
-*RunCodeFlattener*.ps1
-*_codebase_v*.md
-logs
 release.ps1
+test_script.cmd
