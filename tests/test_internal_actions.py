@@ -33,7 +33,9 @@ class TestInternalActions(unittest.TestCase):
     # FIX: Update the patch target to the new, explicit path.
     @patch("typerdantic.app.PromptSession")
     @patch("typerdantic.executors.registry.get_action")
-    def test_internal_action_execution(self, mock_get_action, MockPromptSession):
+    def test_internal_action_execution(
+        self, mock_get_action, MockPromptSession
+    ):
         """
         Tests that the app calls the correct registered internal actions
         by mocking the registry lookup instead of the actions themselves.
@@ -75,7 +77,11 @@ class TestInternalActions(unittest.TestCase):
         DynamicInternalMenu = create_menu_from_config(
             "DynamicInternalMenu", menu_config
         )
+        DynamicInternalMenu.__doc__ = menu_config.doc
+
+        # Create the TyperdanticApp with the dynamic menu
         app = TyperdanticApp(main_menu=DynamicInternalMenu)
+        app.active_menu = DynamicInternalMenu(app=app)
 
         async def run_test_flow():
             # Simulate selecting the 'hello' item

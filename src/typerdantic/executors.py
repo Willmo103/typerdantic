@@ -1,10 +1,9 @@
-# src/typerdantic/executors.py
-
 import asyncio
-import shlex
+import sys
+from pathlib import Path
 from typing import Tuple
 
-from . import registry  # <-- More explicit import
+from . import registry
 
 # --- Action Executor ---
 
@@ -47,7 +46,6 @@ async def execute_action_string(action_string: str):
     print(f"\nExecuting {action_type}: {value}")
 
     if action_type == "internal":
-        # Use the explicit path to look up the action
         action_func = registry.get_action(value)
         if action_func:
             if asyncio.iscoroutinefunction(action_func):
@@ -58,7 +56,27 @@ async def execute_action_string(action_string: str):
             print(f"\nError: Internal action '{value}' not found in registry.")
 
     elif action_type in ["command", "script"]:
-        return_code, stdout, stderr = await run_command(value)
+        # --- FIX STARTS HERE ---
+        # By default, the command is the raw value from the config.
+        command_to_run = value
+
+        # If the action is a script, build a more specific command to ensure
+        # it's executed by an interpreter instead of opened by a default program.
+        if action_type == "script":
+            script_path = Path(value)
+            # For PowerShell scripts on Windows, explicitly call powershell.exe.
+            if (
+                sys.platform == "win32"
+                and script_path.suffix.lower() == ".ps1"
+            ):
+                command_to_run = f'powershell.exe -File "{script_path}"'
+            # For Python scripts, it's good practice to use the current interpreter.
+            elif script_path.suffix.lower() == ".py":
+                command_to_run = f'"{sys.executable}" "{script_path}"'
+
+        return_code, stdout, stderr = await run_command(command_to_run)
+        # --- FIX ENDS HERE ---
+
         print("-" * 20)
         if stdout:
             print("Output:\n" + stdout)

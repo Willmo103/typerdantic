@@ -17,14 +17,16 @@ sys.path.insert(0, str(project_root / "src"))
 class TestConfigActions(unittest.TestCase):
     def setUp(self):
         """Create a temporary directory and some test scripts."""
-        self.tmpdir = tempfile.TemporaryDirectory()
+        self.tmpdir = tempfile.TemporaryDirectory(delete=False)
         self.tmp_path = Path(self.tmpdir.name)
 
         # Create a test shell script
         self.script_path = self.tmp_path / "test_script.ps1"
         self.script_output_path = self.tmp_path / "script_output.txt"
         # Use a simple command that works on both Windows and Unix-like systems
-        self.script_path.write_text(f'echo "script ran" > "{self.script_output_path}"')
+        self.script_path.write_text(
+            f'echo "script ran" > "{self.script_output_path}"'
+        )
 
     def tearDown(self):
         """Clean up the temporary directory."""
@@ -34,6 +36,8 @@ class TestConfigActions(unittest.TestCase):
         """
         Tests creating a menu from a config that executes external commands.
         """
+        self.setUp()
+
         command_output_path = self.tmp_path / "command_output.txt"
 
         # Define a menu configuration using our Pydantic models
@@ -43,12 +47,12 @@ class TestConfigActions(unittest.TestCase):
                 "command_item": {
                     "description": "Run a shell command (echo)",
                     # Use a command that works on both Windows and Unix
-                    "action": f'command::echo "command ran" > "{command_output_path}"',
+                    "action": f'command::echo "command ran" > {command_output_path}',
                 },
                 "script_item": {
                     "description": "Run a shell script",
                     # Use 'bash' for unix, or just run for windows
-                    "action": f'script::{"bash " if sys.platform != "win32" else ""}"{self.script_path}"',
+                    "action": f'script::{"bash " if sys.platform != "win32" else ""}{self.script_path}',
                 },
                 "quit_item": {"description": "Quit", "is_quit": True},
             },
@@ -58,7 +62,9 @@ class TestConfigActions(unittest.TestCase):
         menu_config = MenuConfig(**menu_dict)
 
         # Create the menu class from the validated config
-        DynamicActionMenu = create_menu_from_config("DynamicActionMenu", menu_config)
+        DynamicActionMenu = create_menu_from_config(
+            "DynamicActionMenu", menu_config
+        )
 
         # We need to run the app to test the actions
         app = TyperdanticApp(main_menu=DynamicActionMenu)
@@ -80,10 +86,17 @@ class TestConfigActions(unittest.TestCase):
 
         # Assert that the output files were created with the correct content
         self.assertTrue(command_output_path.exists())
-        self.assertEqual(command_output_path.read_text().strip(), "command ran")
+        content_from_command = (
+            command_output_path.read_text().strip().strip('"')
+        )
+        self.assertEqual(content_from_command, "command ran")
 
         self.assertTrue(self.script_output_path.exists())
-        self.assertEqual(self.script_output_path.read_text().strip(), "script ran")
+        # Reading the output from the PowerShell script
+        content_from_script = self.script_output_path.read_text(
+            encoding="utf-16"
+        ).strip()
+        self.assertEqual(content_from_script, "script ran")
 
 
 if __name__ == "__main__":

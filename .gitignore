@@ -11,3 +11,15 @@ wheels/
 .venv
 mkdocs.yml
 docs/guides/styling.md
+.dev
+*RunCodeFlattener*.ps1
+*AddDoc*.ps1
+*RunCodeFlattener*.ps1
+*_codebase_v*.md
+logs
+test_results.txt
+
+.dev
+*RunCodeFlattener*.ps1
+*_codebase_v*.md
+logs

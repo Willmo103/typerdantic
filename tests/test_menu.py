@@ -1,8 +1,7 @@
 # file: tests/test_menu.py
 
 from pydantic import Field
-
-from . import TyperdanticMenu, MenuItem, TyperdanticApp
+from typerdantic import TyperdanticMenu, MenuItem, TyperdanticApp
 import asyncio
 import sys
 from pathlib import Path
@@ -55,35 +54,60 @@ class TestMenu(TyperdanticMenu):
     item_12: MenuItem = Field(default=MenuItem(description="Item 12"))
 
     sync_item: MenuItem = Field(
-        default=MenuItem(description="Run a Synchronous Action", action=sync_action)
+        default=MenuItem(
+            description="Run a Synchronous Action", action=sync_action
+        )
     )
     async_item: MenuItem = Field(
-        default=MenuItem(description="Run an Asynchronous Action", action=async_action)
+        default=MenuItem(
+            description="Run an Asynchronous Action", action=async_action
+        )
     )
 
-    quit_item: MenuItem = Field(default=MenuItem(description="Quit", is_quit=True))
+    quit_item: MenuItem = Field(
+        default=MenuItem(description="Quit", is_quit=True)
+    )
 
 
 # --- Main execution block ---
+async def run_test_menu():
+    """Run the `Interactive` TestMenu in a TyperdanticApp.
 
+    This will Launch a TyperdanticApp with the TestMenu as the main menu.
 
-async def main():
-    """The main entry point for the test."""
+    Target Metrics for this test:
+    - Ensure the menu displays all items correctly.
+        -Expected: All items should be visible, with scrolling enabled if necessary.
+    - Verify that the synchronous action executes correctly.
+        -Expected: The synchronous action should print a message to the console, pausing for user input.
+    - Verify that the asynchronous action executes correctly.
+        -Expected: The asynchronous action should print a message to the console after a delay.
+    - Ensure the quit action exits the menu cleanly.
+        -Expected: The application should exit without errors when the quit action is selected.
+    - Test navigation through the menu.
+        -Expected: Users should be able to navigate through the menu items using arrow keys.
+    - Ensure the menu can handle more items than can fit on the screen.
+        -Expected: Scrolling should work correctly when there are more items than can fit on the
+        screen.
+    - Test both synchronous and asynchronous actions.
+        -Expected: Both actions should execute without errors and produce the expected output.
 
-    # 1. Create the app with the TestMenu as the main menu
+    """
     app = TyperdanticApp(main_menu=TestMenu)
-
-    # 2. Register the TestMenu
     app.register_menu("test", TestMenu)
 
-    # 3. Run the application
     print("Starting Typerdantic interactive test...")
-    await app.run()
+    try:
+        await app.run()
+    except KeyboardInterrupt:
+        print("\nTest interrupted by user.")
+    except Exception as e:
+        print(f"An error occurred while running the test menu: {e}")
 
 
 if __name__ == "__main__":
     try:
-        asyncio.run(main())
+        asyncio.run(run_test_menu())
         print("Test finished cleanly.")
     except (KeyboardInterrupt, EOFError):
         print("\nTest interrupted by user.")

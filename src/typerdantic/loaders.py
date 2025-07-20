@@ -10,7 +10,9 @@ from .config_models import MenuConfig
 from .executors import execute_action_string
 
 
-def create_menu_from_config(name: str, config: MenuConfig) -> Type[TyperdanticMenu]:
+def create_menu_from_config(
+    name: str, config: MenuConfig
+) -> Type[TyperdanticMenu]:
     """
     Dynamically creates a TyperdanticMenu subclass from a MenuConfig object
     using Pydantic's `create_model` utility.
@@ -40,6 +42,13 @@ def create_menu_from_config(name: str, config: MenuConfig) -> Type[TyperdanticMe
 
     # Use pydantic.create_model to build the class correctly
     NewMenu = create_model(name, __base__=TyperdanticMenu, **field_definitions)
+
+    # Import locally to resolve the forward reference to 'TyperdanticApp'
+    # without causing a circular import at the module level.
+    from typerdantic.app import TyperdanticApp  # noqa: F401
+
+    # Now, when Pydantic resolves the type hints, it can find TyperdanticApp.
+    NewMenu.model_rebuild()
 
     # Set the docstring on the newly created class
     NewMenu.__doc__ = config.doc
