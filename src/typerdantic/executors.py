@@ -1,7 +1,9 @@
+# src/typerdantic/executors.py
+
 import asyncio
 import sys
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Dict, Any, Optional
 
 from . import registry
 
@@ -18,17 +20,21 @@ async def run_command(command: str) -> Tuple[int, str, str]:
     stdout, stderr = await process.communicate()
     return (
         process.returncode if process.returncode is not None else -1,
-        # Decode output and errors, ignoring any decoding errors
         stdout.decode("utf-8", errors="ignore"),
         stderr.decode("utf-8", errors="ignore"),
     )
 
 
 async def execute_action_string(
-    action_string: str, context: dict | None = None, args: dict | None = None
+    action_string: str,
+    context: Optional[Dict[str, Any]] = None,
+    args: Optional[Dict[str, Any]] = None,
 ) -> None:
     """
     Parses and executes an action string from a menu configuration.
+    - `action_string`: The core action, e.g., "internal::my_func".
+    - `context`: App-level context (e.g., the active menu).
+    - `args`: Item-specific arguments from the config.
     """
     if not isinstance(action_string, str):
         print(
@@ -46,11 +52,15 @@ async def execute_action_string(
         )
         return
 
+    # Ensure args is a dictionary for formatting
+    args = args or {}
+
     print(f"\nExecuting {action_type}: {value}")
 
     if action_type == "internal":
         action_func = registry.get_action(value)
         if action_func:
+            # Pass both context from the app and args from the menu item
             if asyncio.iscoroutinefunction(action_func):
                 await action_func(context=context, args=args)
             else:
@@ -59,32 +69,26 @@ async def execute_action_string(
             print(f"\nError: Internal action '{value}' not found in registry.")
 
     elif action_type in ["command", "script"]:
-        command_to_run = value
+        # Format the command or script path with the provided arguments
+        command_to_run = value.format(**args)
 
-        # If the action is a script, build a more specific command to ensure
-        # it's executed by an interpreter instead of opened by a default program.
         if action_type == "script":
-            script_path = Path(value)
-            # For PowerShell scripts on Windows, explicitly call powershell.exe.
+            script_path = Path(command_to_run)
             if (
                 sys.platform == "win32"
                 and script_path.suffix.lower() == ".ps1"
             ):
-                command_to_run = f'powershell.exe -File "{script_path}"'
+                command_to_run = f'powershell.exe -ExecutionPolicy Bypass -File "{script_path}"'
             elif script_path.suffix.lower() in [".sh", ".bash"]:
-                # For shell scripts, use bash on Unix-like systems.
                 command_to_run = f'bash "{script_path}"'
             elif script_path.suffix.lower() in [".bat", ".cmd"]:
                 command_to_run = f'cmd.exe /c "{script_path}"'
-            # For Python scripts, it's good practice to use the current interpreter.
             elif script_path.suffix.lower() == ".py":
                 command_to_run = f'"{sys.executable}" "{script_path}"'
-            elif script_path.suffix.lower() in [".js"]:
-                # For JavaScript/TypeScript, use Node.js.
+            elif script_path.suffix.lower() == ".js":
                 command_to_run = f'node "{script_path}"'
 
         return_code, stdout, stderr = await run_command(command_to_run)
-        # --- FIX ENDS HERE ---
 
         print("-" * 20)
         if stdout:
