@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "typerdantic"
-version = "1.0.0"
+version = "1.0.1"
 authors = [
   { name="Will Morris", email="willmorris103@gmail.com" },
 ]
@@ -25,3 +25,5 @@ dependencies = [
 [project.urls]
 "Homepage" = "https://github.com/Willmo103/typerdantic"
 "Bug Tracker" = "https://github.com/Willmo103/typerdantic/issues"
+
+
